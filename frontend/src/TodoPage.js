@@ -1,30 +1,18 @@
 import "./APP.css";
 
-const today = new Date().toISOString().split("T")[0];
-
-
-
-
 function TodoPage({
   name,
   role,
-  tasks,
-  setTasks,
-  sortTasks,
+  missions,
+  setMissions,
+  sortMissions,
   isOverdue,
   toggleComplete,
   toggleEdit,
   saveEdit,
-  deleteTask,
+  deleteMission,
   openTasks,
   toggleDescription,
-  taskInput,
-  setTaskInput,
-  description,
-  setDescription,
-  dueDate,
-  setDueDate,
-  addTask,
   navigate,
 }) {
   return (
@@ -46,7 +34,7 @@ function TodoPage({
       <div className="todo-layout">
         {/* צד שמאל – משימות */}
         <div className="tasks-panel">
-          <h2 className="panel-title">Your Tasks</h2>
+          <h2 className="panel-title">Your Missions</h2>
 
           <button
             className="send-button"
@@ -57,30 +45,30 @@ function TodoPage({
           </button>
 
           <ul className="tasks-list">
-            {sortTasks(tasks).map((task) => (
+            {sortMissions(missions).map((mission) => (
               <li
-                key={task.id}
-                className={`task-item ${isOverdue(task) ? "overdue" : ""}`}
+                key={mission.id}
+                className={`task-item ${isOverdue(mission) ? "overdue" : ""}`}
               >
                 <div className="task-left">
                   <input
                     type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleComplete(task)}
+                    checked={mission.completed}
+                    onChange={() => toggleComplete(mission)}
                   />
 
-                  {task.isEditing ? (
+                  {mission.isEditing ? (
                     <div className="edit-box">
                       <input
                         className="input-box edit-input"
-                        value={task.editText}
+                        value={mission.editText}
                         autoFocus
                         onChange={(e) =>
-                          setTasks(
-                            tasks.map((t) =>
-                              t.id === task.id
-                                ? { ...t, editText: e.target.value }
-                                : t
+                          setMissions(
+                            missions.map((m) =>
+                              m.id === mission.id
+                                ? { ...m, editText: e.target.value }
+                                : m
                             )
                           )
                         }
@@ -88,17 +76,17 @@ function TodoPage({
 
                       <textarea
                         className="input-box edit-input"
-                        value={task.editDescription}
+                        value={mission.editDescription}
                         placeholder="Edit description..."
                         onChange={(e) =>
-                          setTasks(
-                            tasks.map((t) =>
-                              t.id === task.id
+                          setMissions(
+                            missions.map((m) =>
+                              m.id === mission.id
                                 ? {
-                                    ...t,
+                                    ...m,
                                     editDescription: e.target.value,
                                   }
-                                : t
+                                : m
                             )
                           )
                         }
@@ -107,17 +95,17 @@ function TodoPage({
                       <input
                         className="input-box edit-input"
                         type="date"
-                        value={task.editDueDate}
+                        value={mission.editDueDate}
                         min={new Date().toISOString().split("T")[0]}
                         onChange={(e) =>
-                          setTasks(
-                            tasks.map((t) =>
-                              t.id === task.id
+                          setMissions(
+                            missions.map((m) =>
+                              m.id === mission.id
                                 ? {
-                                    ...t,
+                                    ...m,
                                     editDueDate: e.target.value,
                                   }
-                                : t
+                                : m
                             )
                           )
                         }
@@ -125,7 +113,7 @@ function TodoPage({
 
                       <button
                         className="send-button"
-                        onClick={() => saveEdit(task)}
+                        onClick={() => saveEdit(mission)}
                         style={{background: "#6c4ed9" }}
                       >
                         Save
@@ -135,46 +123,46 @@ function TodoPage({
                     <div className="task-text">
                       <div className="task-main-line">
                         <span
-                          className={task.completed ? "completed" : ""}
+                          className={mission.completed ? "completed" : ""}
                         >
-                          {task.text}
+                          {mission.title}
                         </span>
 
-                        {task.description && (
+                        {mission.description && (
                           <button
                             className="arrow-button"
                             onClick={() =>
-                              toggleDescription(task.id)
+                              toggleDescription(mission.id)
                             }
                           >
-                            {openTasks[task.id] ? "▲" : "▼"}
+                            {openTasks[mission.id] ? "▲" : "▼"}
                           </button>
                         )}
                       </div>
 
-                      {task.due_date && (
+                      {mission.due_date && (
                         <div className="task-date">
-                          Due: {task.due_date}
+                          Due: {mission.due_date}
                         </div>
                       )}
 
-                      {openTasks[task.id] && (
+                      {openTasks[mission.id] && (
                         <div className="task-description">
-                          {task.description && (
+                          {mission.description && (
                             <div>
-                              <b>Description:</b> {task.description}
+                              <b>Description:</b> {mission.description}
                             </div>
                           )}
 
                           <div>
-                            <b>Created by:</b> {task.created_by_name}
+                            <b>Created by:</b> {mission.created_by_name}
                           </div>
 
-                          {task.created_at && (
+                          {mission.created_at && (
                             <div>
                               <b>Created at:</b>{" "}
                               {new Date(
-                                task.created_at
+                                mission.created_at
                               ).toLocaleDateString("he-IL")}
                             </div>
                           )}
@@ -184,18 +172,18 @@ function TodoPage({
                   )}
                 </div>
 
-                {!task.isEditing && (
+                {!mission.isEditing && role?.trim().toLowerCase() === "admin" && (
                   <div className="task-actions">
                     <button
                       className="send-button edit-button"
-                      onClick={() => toggleEdit(task.id)}
+                      onClick={() => toggleEdit(mission.id)}
                     >
                       Edit
                     </button>
 
                     <button
                       className="send-button delete-button"
-                      onClick={() => deleteTask(task.id)}
+                      onClick={() => deleteMission(mission.id)}
                     >
                       Delete
                     </button>
@@ -204,41 +192,6 @@ function TodoPage({
               </li>
             ))}
           </ul>
-        </div>
-
-        {/* צד ימין – הוספת משימה */}
-        <div className="add-panel">
-          <h2 className="panel-title">Add New Task</h2>
-
-          <div className="task-input-container">
-            <input
-              className="input-box"
-              type="text"
-              placeholder="Add a task"
-              value={taskInput}
-              onChange={(e) => setTaskInput(e.target.value)}
-            />
-
-            <textarea
-              className="input-box"
-              placeholder="Description..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-
-            <input
-              className="input-box"
-              type="date"
-              value={dueDate}
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-
-            <button className="send-button" onClick={addTask}
-            style={{ background: "#6c4ed9" }}>
-              Add
-            </button>
-          </div>
         </div>
       </div>
     </>

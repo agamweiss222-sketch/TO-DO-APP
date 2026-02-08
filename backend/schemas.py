@@ -1,37 +1,49 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 from datetime import date, datetime
 from typing import Optional
-from pydantic import constr
 
 
-# ------------------ Tasks ------------------
-class TaskBase(BaseModel):
-    text: str
-    completed: bool = False
-    due_date: Optional[date] = None
+# ------------------ Missions ------------------
+class MissionBase(BaseModel):
+    title: str
     description: Optional[str] = None
+    due_date: Optional[date] = None
 
 
-
-class TaskCreate(TaskBase):
-     text: str
-     completed: bool = False
-     due_date: Optional[date] = None
-     description: Optional[str] = None
+class MissionCreate(MissionBase):
+    title: str
+    description: Optional[str] = None
+    due_date: Optional[date] = None
 
 
-class Task(TaskBase):
+class Mission(MissionBase):
     id: int
-    user_id: int
     created_by_id: int
     created_at: datetime
-    user_name: str
     created_by_name: str
 
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
+
+class MissionWithCompletion(Mission):
+    """Mission with completion status for a specific user"""
+    completed: bool = False
+    completed_at: Optional[datetime] = None
+
+
+# ------------------ Mission Completions ------------------
+class MissionCompletionBase(BaseModel):
+    mission_id: int
+    user_id: int
+
+
+class MissionCompletion(MissionCompletionBase):
+    id: int
+    completed_at: datetime
+    user_name: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ------------------ Users ------------------
@@ -54,7 +66,5 @@ class User(UserBase):
     id: int
     name: str
     role: str
-    tasks: List[Task] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
