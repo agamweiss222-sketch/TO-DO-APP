@@ -5,22 +5,22 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "./api";
 
 
-function CalendarPage() {
+function CalendarPage({ missions }) {
   const [date, setDate] = useState(new Date());
-  const [tasks, setTasks] = useState([]);
+  const [localMissions, setLocalMissions] = useState([]);
   const navigate = useNavigate();
 
 
- useEffect(() => {
-  async function loadTasks() {
-    const res = await apiFetch("http://127.0.0.1:8000/tasks/");
-    if (!res) return;
-    const data = await res.json();
-    setTasks(data);
-  }
+  useEffect(() => {
+    async function loadMissions() {
+      const res = await apiFetch("http://127.0.0.1:8000/missions/");
+      if (!res) return;
+      const data = await res.json();
+      setLocalMissions(data);
+    }
 
-  loadTasks();
-}, []);
+    loadMissions();
+  }, []);
 
  const formatDate = (d) => {
   const year = d.getFullYear();
@@ -31,16 +31,15 @@ function CalendarPage() {
 
   const selectedDate = formatDate(date);
 
-  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const safeMissions = Array.isArray(localMissions) ? localMissions : [];
 
-  const taskDates = safeTasks
-  .filter(task => task.due_date)
-  .map(task => task.due_date);
+  const missionDates = safeMissions
+    .filter(mission => mission.due_date)
+    .map(mission => mission.due_date);
 
-
-const tasksForDate = safeTasks.filter(
-  (task) => task.due_date === selectedDate
-);
+  const missionsForDate = safeMissions.filter(
+    (mission) => mission.due_date === selectedDate
+  );
 
 
 
@@ -51,7 +50,7 @@ const tasksForDate = safeTasks.filter(
       <h1 className="main-title">📅 Calendar</h1>
 
       <button className="send-button" onClick={() => navigate("/")}>
-        Back to Tasks
+        Back to Missions
       </button>
 
       <div style={{ marginTop: "20px" }}>
@@ -61,7 +60,7 @@ const tasksForDate = safeTasks.filter(
           tileClassName={({ date, view }) => {
             if (view === "month") {
               const day = formatDate(date);
-              if (taskDates.includes(day)) {
+              if (missionDates.includes(day)) {
                 return "day-with-task";
               }
             }
@@ -72,16 +71,16 @@ const tasksForDate = safeTasks.filter(
       </div>
 
       <h2 style={{ marginTop: "20px" }}>
-        Tasks for {selectedDate}
+        Missions for {selectedDate}
       </h2>
 
-      {tasksForDate.length === 0 ? (
-        <p>No tasks for this date.</p>
+      {missionsForDate.length === 0 ? (
+        <p>No missions for this date.</p>
       ) : (
         <ul className="tasks-list">
-          {tasksForDate.map((task) => (
-            <li key={task.id} className="task-item">
-              {task.text}
+          {missionsForDate.map((mission) => (
+            <li key={mission.id} className="task-item">
+              {mission.title}
             </li>
           ))}
         </ul>

@@ -17,7 +17,7 @@ function App() {
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [taskInput, setTaskInput] = useState("");
-  const [tasks, setTasks] = useState([]);
+  const [missions, setMissions] = useState([]);
   const [dueDate, setDueDate] = useState("");
   const navigate = useNavigate();
   const [description, setDescription] = useState("");
@@ -49,123 +49,68 @@ useEffect(() => {
   const token = sessionStorage.getItem("accessToken");
   if (!token) return;
 
-  async function loadTasks() {
-    const res = await apiFetch("http://127.0.0.1:8000/tasks/");
+  async function loadMissions() {
+    const res = await apiFetch("http://127.0.0.1:8000/missions/");
     if (!res) return;
     const data = await res.json();
-    setTasks(data);
+    setMissions(data);
   }
 
-  loadTasks();
+  loadMissions();
 }, [submitted]);
 
 
 
-  const addTask = async () => {
-    if (taskInput.trim() === "") return;
-
-    if (!taskInput.trim() || !description.trim() || !dueDate) {
-      alert("יש למלא כותרת, תיאור ותאריך");
-      return;
-    }
-
-    if (dueDate) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
 
 
-      const selected = new Date(dueDate);
-      selected.setHours(0, 0, 0, 0);
-
+  const toggleComplete = async (mission) => {
+    const endpoint = mission.completed 
+      ? `http://127.0.0.1:8000/missions/${mission.id}/complete`
+      : `http://127.0.0.1:8000/missions/${mission.id}/complete`;
     
+    const method = mission.completed ? "DELETE" : "POST";
 
-      if (selected < today) {
-        alert("You cannot select a past due date");
-        return;
-      }
-    }
+    await apiFetch(endpoint, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+    });
 
-      const response = await apiFetch(
-      "http://127.0.0.1:8000/tasks/",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          text: taskInput.trim(),
-          completed: false,
-          due_date: dueDate || null,
-          description: description.trim() || null,
-        }),
-      }
+    setMissions((prevMissions) =>
+      Array.isArray(prevMissions)
+        ? prevMissions.map((m) =>
+            m.id === mission.id ? { ...m, completed: !m.completed } : m
+          )
+        : []
     );
-
-
-    const savedTask = await response.json();
-    setTasks((prevTasks) =>
-      Array.isArray(prevTasks) ? [...prevTasks, savedTask] : [savedTask]
-    );
-    setTaskInput("");
-    setDueDate("");
-    setDescription("");
-
-  };
-
-  const toggleComplete = async (task) => {
-    const response = await apiFetch(
-    `http://127.0.0.1:8000/tasks/${task.id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: task.text,
-          completed: !task.completed,
-          due_date: task.due_date,
-          description: task.description,
-      }),
-      }
-    );
-    const updatedTask = await response.json();
-
-    setTasks((prevTasks) =>
-  Array.isArray(prevTasks)
-    ? prevTasks.map((t) =>
-        t.id === updatedTask.id ? updatedTask : t
-      )
-    : []
-);
-
   };
 
   const toggleEdit = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id 
+    setMissions(
+      missions.map((mission) =>
+        mission.id === id 
           ? { 
-              ...task,
-              isEditing: !task.isEditing,
-              editText: task.text,
-              editDescription: task.description || "",
-              editDueDate: task.due_date || "",
+              ...mission,
+              isEditing: !mission.isEditing,
+              editText: mission.title,
+              editDescription: mission.description || "",
+              editDueDate: mission.due_date || "",
             } 
-            : task
+            : mission
       )
     );
   };
 
- const saveEdit = async (task) => {
-
-  if (!task.editDescription?.trim() ||
-  !task.editDueDate) {
+const saveEdit = async (mission) => {
+  if (!mission.editDescription?.trim() || !mission.editDueDate) {
     alert("יש למלא תיאור ותאריך");
     return;
   }
 
-
-  // ✅ חסימת תאריך עבר בעריכה
-  if (task.editDueDate) {
+  if (mission.editDueDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const selected = new Date(task.editDueDate);
+    const selected = new Date(mission.editDueDate);
     selected.setHours(0, 0, 0, 0);
 
     if (selected < today) {
@@ -175,48 +120,43 @@ useEffect(() => {
   }
 
   const response = await apiFetch(
-  `http://127.0.0.1:8000/tasks/${task.id}`,
-
+    `http://127.0.0.1:8000/missions/${mission.id}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: task.editText,
-        completed: task.completed,
-        due_date: task.editDueDate ? task.editDueDate : null,
-        description: task.editDescription ? task.editDescription : null,
+        title: mission.editText,
+        due_date: mission.editDueDate ? mission.editDueDate : null,
+        description: mission.editDescription ? mission.editDescription : null,
       }),
     }
   );
 
-  const updatedTask = await response.json();
+  const updatedMission = await response.json();
 
-  setTasks((prevTasks) =>
-  Array.isArray(prevTasks)
-    ? prevTasks.map((t) =>
-        t.id === updatedTask.id
-          ? { ...updatedTask, isEditing: false }
-          : t
-      )
-    : []
-);
-
+  setMissions((prevMissions) =>
+    Array.isArray(prevMissions)
+      ? prevMissions.map((m) =>
+          m.id === updatedMission.id
+            ? { ...updatedMission, isEditing: false, completed: mission.completed }
+            : m
+        )
+      : []
+  );
 };
 
 
-  const deleteTask = async (id) => {
+  const deleteMission = async (id) => {
     await apiFetch(
-  `http://127.0.0.1:8000/tasks/${id}`,
-  { method: "DELETE" }
-);
+      `http://127.0.0.1:8000/missions/${id}`,
+      { method: "DELETE" }
+    );
 
-
-    setTasks((prevTasks) =>
-  Array.isArray(prevTasks)
-    ? prevTasks.filter((task) => task.id !== id)
-    : []
-);
-
+    setMissions((prevMissions) =>
+      Array.isArray(prevMissions)
+        ? prevMissions.filter((mission) => mission.id !== id)
+        : []
+    );
   };
   //פונקציה שפותחת חץ
   const toggleDescription = (id) => {
@@ -230,15 +170,15 @@ useEffect(() => {
     sessionStorage.clear();
     setSubmitted(false);
     setName("");
-    setTasks([]); 
+    setMissions([]); 
   };
 
-  const sortTasks = (tasksArray) => {
-  if (!Array.isArray(tasksArray)) {
+  const sortMissions = (missionsArray) => {
+  if (!Array.isArray(missionsArray)) {
     return [];
   }
 
-  return [...tasksArray].sort((a, b) => {
+  return [...missionsArray].sort((a, b) => {
     if (a.completed !== b.completed) {
       return a.completed - b.completed;
     }
@@ -246,14 +186,14 @@ useEffect(() => {
   });
 };
 
-const isOverdue = (task) => {
-  if (!task.due_date) return false;
-  if (task.completed) return false;
+const isOverdue = (mission) => {
+  if (!mission.due_date) return false;
+  if (mission.completed) return false;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const due = new Date(task.due_date);
+  const due = new Date(mission.due_date);
   due.setHours(0, 0, 0, 0);
 
   return due < today;
@@ -278,23 +218,16 @@ return (
             <TodoPage
               name={name}
               role={role}
-              tasks={tasks}
-              setTasks={setTasks}
-              sortTasks={sortTasks}
+              missions={missions}
+              setMissions={setMissions}
+              sortMissions={sortMissions}
               isOverdue={isOverdue}
               toggleComplete={toggleComplete}
               toggleEdit={toggleEdit}
               saveEdit={saveEdit}
-              deleteTask={deleteTask}
+              deleteMission={deleteMission}
               openTasks={openTasks}
               toggleDescription={toggleDescription}
-              taskInput={taskInput}
-              setTaskInput={setTaskInput}
-              description={description}
-              setDescription={setDescription}
-              dueDate={dueDate}
-              setDueDate={setDueDate}
-              addTask={addTask}
               navigate={navigate}
             />
 
@@ -307,7 +240,7 @@ return (
 
     <Route
       path="/calendar"
-      element={<CalendarPage tasks={tasks} />}
+      element={<CalendarPage missions={missions} />}
     />
     <Route path="/signup" element={<SignupPage />} />
     <Route path="/admin" element={<AdminPage />} />
