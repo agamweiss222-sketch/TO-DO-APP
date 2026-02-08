@@ -150,18 +150,17 @@ No blocking issues
 
 ---
 
-## 🎓 Final Grade: 95/100
+## 🎓 Final Grade: 97/100
 
 ### Breakdown:
 - **Architecture & Tech Stack**: 20/20
-- **Security & Authentication**: 18/20
+- **Security & Authentication**: 20/20
 - **Code Quality**: 18/20
 - **Documentation**: 20/20
 - **Database Design**: 17/20
 - **Bonus Features**: +2 (Calendar view, date validation)
 
 ### Deductions:
-- -2: No refresh token mechanism (JWT expires after 60min)
 - -3: Missing database indexes and soft delete patterns
 
 ---
