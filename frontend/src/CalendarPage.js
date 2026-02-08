@@ -13,7 +13,7 @@ function CalendarPage({ missions }) {
 
   useEffect(() => {
     async function loadMissions() {
-      const res = await apiFetch("http://127.0.0.1:8000/missions/");
+      const res = await apiFetch("http://127.0.0.1:8000/missions");
       if (!res) return;
       const data = await res.json();
       setLocalMissions(data);

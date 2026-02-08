@@ -37,10 +37,9 @@ function AdminPage() {
       editDueDate &&
       editDueDate >= today;
 
-  
   useEffect(() => {
     async function loadMissions() {
-      const res = await apiFetch("http://127.0.0.1:8000/admin/missions/");
+      const res = await apiFetch("http://127.0.0.1:8000/admin/missions");
       if (!res) return;
       const data = await res.json();
       setMissions(data);
@@ -63,7 +62,7 @@ function AdminPage() {
     setError("");
 
     const response = await apiFetch(
-      `http://127.0.0.1:8000/admin/missions/`,
+      "http://127.0.0.1:8000/admin/missions",
       {
         method: "POST",
         body: JSON.stringify({

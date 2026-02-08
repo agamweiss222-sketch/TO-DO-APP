@@ -47,7 +47,7 @@ useEffect(() => {
   if (!token) return;
 
   async function loadMissions() {
-    const res = await apiFetch("http://127.0.0.1:8000/missions/");
+    const res = await apiFetch("http://127.0.0.1:8000/missions");
     if (!res) return;
     const data = await res.json();
     setMissions(data);
@@ -61,13 +61,9 @@ useEffect(() => {
 
 
   const toggleComplete = async (mission) => {
-    const endpoint = mission.completed 
-      ? `http://127.0.0.1:8000/missions/${mission.id}/complete`
-      : `http://127.0.0.1:8000/missions/${mission.id}/complete`;
-    
     const method = mission.completed ? "DELETE" : "POST";
 
-    await apiFetch(endpoint, {
+    await apiFetch(`http://127.0.0.1:8000/missions/${mission.id}/complete`, {
       method: method,
       headers: { "Content-Type": "application/json" },
     });
@@ -135,7 +131,7 @@ const saveEdit = async (mission) => {
     Array.isArray(prevMissions)
       ? prevMissions.map((m) =>
           m.id === updatedMission.id
-            ? { ...updatedMission, isEditing: false, completed: mission.completed }
+            ? { ...updatedMission, isEditing: false }
             : m
         )
       : []
