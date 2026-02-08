@@ -1,8 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 from datetime import date, datetime
 from typing import Optional
-from pydantic import constr
 
 
 # ------------------ Missions ------------------
@@ -24,8 +23,7 @@ class Mission(MissionBase):
     created_at: datetime
     created_by_name: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MissionWithCompletion(Mission):
@@ -45,8 +43,7 @@ class MissionCompletion(MissionCompletionBase):
     completed_at: datetime
     user_name: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ------------------ Users ------------------
@@ -69,7 +66,5 @@ class User(UserBase):
     id: int
     name: str
     role: str
-    tasks: List[Task] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
