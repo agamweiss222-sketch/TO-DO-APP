@@ -16,11 +16,8 @@ import { apiFetch } from "./api";
 function App() {
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [taskInput, setTaskInput] = useState("");
   const [missions, setMissions] = useState([]);
-  const [dueDate, setDueDate] = useState("");
   const navigate = useNavigate();
-  const [description, setDescription] = useState("");
   const [ openTasks, setOpenTasks] = useState({});
   const role = sessionStorage.getItem("role");
   

@@ -1,10 +1,5 @@
 import "./APP.css";
 
-const today = new Date().toISOString().split("T")[0];
-
-
-
-
 function TodoPage({
   name,
   role,
