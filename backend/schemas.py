@@ -30,8 +30,7 @@ class Task(TaskBase):
     created_by_name: str
 
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 
 # ------------------ Users ------------------
@@ -56,5 +55,4 @@ class User(UserBase):
     role: str
     tasks: List[Task] = []
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
